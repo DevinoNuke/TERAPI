@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'pages/main_screen.dart';
+import 'package:iontophoresis/pages/gsr_value_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
         fontFamily: 'Roboto',
       ),
       debugShowCheckedModeBanner: false,
-      home: const MainScreen(),
+      home: const GSRValueScreen(),
     );
   }
 }

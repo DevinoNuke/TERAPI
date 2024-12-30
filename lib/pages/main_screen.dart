@@ -8,7 +8,7 @@ class MainScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Iontophoresis Therapy',
+          'Terapi Iontophoresis',
           style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
         ),
         centerTitle: true,
@@ -28,7 +28,7 @@ class MainScreen extends StatelessWidget {
           child: OutlinedButton.icon(
             icon: const Icon(Icons.play_circle_filled, size: 30, color: Colors.white),
             label: const Text(
-              'Start Therapy',
+              'Mulai Terapi',
               style: TextStyle(
                   fontSize: 20,
                   color: Colors.lightBlueAccent,

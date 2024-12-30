@@ -9,7 +9,7 @@ class GSRValueScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'GSR Value Monitoring',
+          'Monitor Terapi',
           style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
         ),
         centerTitle: true,
@@ -39,7 +39,7 @@ class GSRValueScreen extends StatelessWidget {
                 child: Column(
                   children: [
                     const Text(
-                      'GSR VALUE',
+                      'Nilai GSR',
                       style: TextStyle(
                         fontSize: 22,
                         color: Colors.lightBlueAccent,
@@ -62,7 +62,7 @@ class GSRValueScreen extends StatelessWidget {
                         _buildActionButton(context, Icons.bar_chart, 'Data GSR',
                             DataGSRScreen()),
                         _buildActionButton(context, Icons.play_arrow,
-                            'Start Therapy', const StartTherapyScreen()),
+                            'Mulai Terapi', const StartTherapyScreen()),
                       ],
                     ),
                   ],

@@ -14,7 +14,7 @@ class DataGSRScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'GSR Data History',
+          'Riwayat Data GSR',
           style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
         ),
         centerTitle: true,

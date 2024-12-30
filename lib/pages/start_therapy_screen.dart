@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'package:mqtt_client/mqtt_client.dart';
+import 'package:mqtt_client/mqtt_server_client.dart';
 
 class StartTherapyScreen extends StatefulWidget {
   const StartTherapyScreen({super.key});
@@ -13,10 +15,15 @@ class StartTherapyScreenState extends State<StartTherapyScreen> {
   int timeRemaining = 1800; // Default 30 menit dalam detik
   Timer? timer;
   TextEditingController minuteController = TextEditingController(text: '30');
+  late MqttServerClient client;
+  bool mqttConnected = false;
+  final String topicName = 'therapy/status'; // topic untuk publish/subscribe
 
   @override
   void initState() {
     super.initState();
+    setupMqttClient();
+    connectClient();
     minuteController.addListener(() {
       if (!isTherapyStarted) {
         int? minutes = int.tryParse(minuteController.text);
@@ -29,10 +36,76 @@ class StartTherapyScreenState extends State<StartTherapyScreen> {
     });
   }
 
+  Future<void> setupMqttClient() async {
+    client = MqttServerClient.withPort('broker.emqx.io', 'flutter_client_${DateTime.now().millisecondsSinceEpoch}', 1883);
+    client.logging(on: true);
+    client.keepAlivePeriod = 60;
+    client.onConnected = onConnected;
+    client.onDisconnected = onDisconnected;
+    client.onSubscribed = onSubscribed;
+    client.onSubscribeFail = onSubscribeFail;
+    
+    final connMessage = MqttConnectMessage()
+        .withClientIdentifier('flutter_client_${DateTime.now().millisecondsSinceEpoch}')
+        .withWillTopic('willtopic')
+        .withWillMessage('Will message')
+        .startClean()
+        .withWillQos(MqttQos.atLeastOnce);
+    
+    client.connectionMessage = connMessage;
+  }
+
+  Future<void> connectClient() async {
+    try {
+      debugPrint('Connecting to MQTT broker...');
+      await client.connect();
+      
+      if (client.connectionStatus!.state == MqttConnectionState.connected) {
+        debugPrint('Connected to MQTT broker successfully');
+        client.subscribe(topicName, MqttQos.atLeastOnce);
+        
+        client.updates!.listen((List<MqttReceivedMessage<MqttMessage?>>? c) {
+          if (c == null) return;
+          final recMessage = c[0].payload as MqttPublishMessage;
+          final payload = MqttPublishPayload.bytesToStringAsString(recMessage.payload.message);
+          debugPrint('Pesan diterima: $payload dari topic: ${c[0].topic}');
+        });
+      } else {
+        debugPrint('Connection failed - disconnecting, status is ${client.connectionStatus}');
+        client.disconnect();
+      }
+    } catch (e) {
+      debugPrint('Exception: $e');
+      client.disconnect();
+    }
+  }
+
+  // Callback functions
+  void onConnected() {
+    setState(() => mqttConnected = true);
+    debugPrint('Connected to MQTT Broker');
+  }
+
+  void onDisconnected() {
+    setState(() => mqttConnected = false);
+    debugPrint('Disconnected from MQTT Broker');
+  }
+
+  void onSubscribed(String topic) {
+    debugPrint('Subscribed to topic: $topic');
+  }
+
+  void onSubscribeFail(String topic) {
+    debugPrint('Failed to subscribe to topic: $topic');
+  }
+
   void startTherapy() {
     setState(() {
       isTherapyStarted = true;
     });
+
+    // Publish status ke MQTT
+    publishMessage('start');
 
     timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
@@ -53,6 +126,63 @@ class StartTherapyScreenState extends State<StartTherapyScreen> {
       int? minutes = int.tryParse(minuteController.text);
       timeRemaining = (minutes ?? 30) * 60;
     });
+
+    // Publish status ke MQTT
+    publishMessage('stop');
+
+    // Tampilkan dialog notifikasi
+    showTherapyCompletionDialog();
+  }
+
+  void showTherapyCompletionDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false, // User harus menekan tombol untuk menutup
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          title: Container(
+            color: Colors.black,
+            child: const Row(
+              children: [
+                Icon(Icons.check_circle, color: Colors.green, size: 30),
+                SizedBox(width: 10),
+                Text('Terapi Selesai', style: TextStyle(color: Colors.white)),
+              ],
+            ),
+          ),
+          content: Container(
+            color: Colors.black,
+            child: const Text(
+              'Sesi terapi Anda telah selesai. Terima kasih telah menggunakan layanan kami.',
+              style: TextStyle(fontSize: 16, color: Colors.white),
+            ),
+          ),
+          actions: [
+            TextButton(
+              style: TextButton.styleFrom(
+                backgroundColor: Colors.blue,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text(
+                'Tutup',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ],
+          backgroundColor: Colors.black,
+          elevation: 5,
+        );
+      },
+    );
   }
 
   void setTime(int minutes) {
@@ -70,8 +200,17 @@ class StartTherapyScreenState extends State<StartTherapyScreen> {
     return '${minutes.toString().padLeft(2, '0')}:${remainingSeconds.toString().padLeft(2, '0')}';
   }
 
+  void publishMessage(String message) {
+    if (client.connectionStatus?.state == MqttConnectionState.connected) {
+      final builder = MqttClientPayloadBuilder();
+      builder.addString(message);
+      client.publishMessage(topicName, MqttQos.atLeastOnce, builder.payload!);
+    }
+  }
+
   @override
   void dispose() {
+    client.disconnect();
     timer?.cancel();
     minuteController.dispose();
     super.dispose();
@@ -82,7 +221,7 @@ class StartTherapyScreenState extends State<StartTherapyScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Therapy Session',
+          'Sesi Terapi',
           style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
         ),
         centerTitle: true,
@@ -114,7 +253,7 @@ class StartTherapyScreenState extends State<StartTherapyScreen> {
                     child: Column(
                       children: [
                         const Text(
-                          'Time Remaining',
+                          'Waktu Terapi',
                           style: TextStyle(
                             fontSize: 22,
                             color: Colors.lightBlueAccent,
@@ -173,7 +312,7 @@ class StartTherapyScreenState extends State<StartTherapyScreen> {
                             color: Colors.white,
                           ),
                           label: Text(
-                            isTherapyStarted ? 'Stop Therapy' : 'Start Therapy',
+                            isTherapyStarted ? 'Berhenti Terapi' : 'Mulai Terapi',
                             style: const TextStyle(color: Colors.lightBlueAccent),
                           ),
                           style: OutlinedButton.styleFrom(
@@ -220,7 +359,7 @@ class StartTherapyScreenState extends State<StartTherapyScreen> {
       ),
       onPressed: () => setTime(minutes),
       child: Text(
-        '$minutes min',
+        '$minutes Menit',
         style: const TextStyle(color: Colors.lightBlueAccent),
       ),
     );
