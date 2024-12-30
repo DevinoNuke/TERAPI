@@ -37,7 +37,7 @@ class StartTherapyScreenState extends State<StartTherapyScreen> {
   }
 
   Future<void> setupMqttClient() async {
-    client = MqttServerClient.withPort('broker.emqx.io', 'flutter_client_${DateTime.now().millisecondsSinceEpoch}', 1883);
+    client = MqttServerClient.withPort('broker.emqx.io', 'flutter_client', 1883);
     client.logging(on: true);
     client.keepAlivePeriod = 60;
     client.onConnected = onConnected;
@@ -46,7 +46,7 @@ class StartTherapyScreenState extends State<StartTherapyScreen> {
     client.onSubscribeFail = onSubscribeFail;
     
     final connMessage = MqttConnectMessage()
-        .withClientIdentifier('flutter_client_${DateTime.now().millisecondsSinceEpoch}')
+        .withClientIdentifier('flutter_client')
         .withWillTopic('willtopic')
         .withWillMessage('Will message')
         .startClean()
