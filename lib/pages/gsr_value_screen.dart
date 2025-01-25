@@ -145,7 +145,7 @@ class _GSRValueScreenState extends State<GSRValueScreen> {
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [Colors.blue[500]!, Colors.blue[900]!],
+              colors: [Colors.blue[500]!, Colors.blue[600]!],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
