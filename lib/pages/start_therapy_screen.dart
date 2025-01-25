@@ -252,170 +252,180 @@ class StartTherapyScreenState extends State<StartTherapyScreen> {
       appBar: AppBar(
         title: const Text(
           'Sesi Terapi',
-          style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
+        elevation: 0,
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [Colors.blue, Colors.blue[800]!],
+              colors: [Colors.blue[700]!, Colors.blue[900]!],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
           ),
         ),
       ),
-      body: Center(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Card(
-                  elevation: 12,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.blue[50]!, Colors.blue[100]!],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Card(
+              elevation: 8,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.blue[800]!, Colors.blue[900]!],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
-                  color: Colors.blue[900],
-                  child: Padding(
-                    padding: const EdgeInsets.all(24.0),
-                    child: Column(
-                      children: [
-                        TextField(
-                          controller: usernameController,
-                          style: const TextStyle(color: Colors.white),
-                          decoration: const InputDecoration(
-                            labelText: 'Username',
-                            labelStyle: TextStyle(color: Colors.lightBlueAccent),
-                            enabledBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: Colors.lightBlueAccent),
-                            ),
-                            focusedBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: Colors.lightBlueAccent),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        
-                        TextField(
-                          controller: teganganController,
-                          keyboardType: TextInputType.number,
-                          style: const TextStyle(color: Colors.white),
-                          decoration: const InputDecoration(
-                            labelText: 'Tegangan (V)',
-                            labelStyle: TextStyle(color: Colors.lightBlueAccent),
-                            enabledBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: Colors.lightBlueAccent),
-                            ),
-                            focusedBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: Colors.lightBlueAccent),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-
-                        const Text(
-                          'Waktu Terapi',
-                          style: TextStyle(
-                            fontSize: 22,
-                            color: Colors.lightBlueAccent,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          formatTime(timeRemaining),
-                          style: const TextStyle(
-                            fontSize: 48,
-                            color: Colors.amberAccent,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        
-                        if (!isTherapyStarted) ...[
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              _buildTimeButton(20),
-                              const SizedBox(width: 10),
-                              _buildTimeButton(40),
-                              const SizedBox(width: 10),
-                              _buildTimeButton(60),
-                            ],
-                          ),
-                          const SizedBox(height: 20),
-                          SizedBox(
-                            width: 100,
-                            child: TextField(
-                              controller: minuteController,
-                              keyboardType: TextInputType.number,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 20,
-                              ),
-                              decoration: const InputDecoration(
-                                labelText: 'Menit',
-                                labelStyle: TextStyle(color: Colors.lightBlueAccent),
-                                enabledBorder: UnderlineInputBorder(
-                                  borderSide: BorderSide(color: Colors.lightBlueAccent),
-                                ),
-                                focusedBorder: UnderlineInputBorder(
-                                  borderSide: BorderSide(color: Colors.lightBlueAccent),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                        const SizedBox(height: 20),
-                        
-                        OutlinedButton.icon(
-                          icon: Icon(
-                            isTherapyStarted ? Icons.stop : Icons.play_arrow,
-                            color: Colors.white,
-                          ),
-                          label: Text(
-                            isTherapyStarted ? 'Berhenti Terapi' : 'Mulai Terapi',
-                            style: const TextStyle(color: Colors.lightBlueAccent),
-                          ),
-                          style: OutlinedButton.styleFrom(
-                            padding:
-                                const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
-                            backgroundColor: isTherapyStarted
-                                ? Colors.red[800]
-                                : Colors.blue[800],
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            side: BorderSide(
-                                color: isTherapyStarted
-                                    ? Colors.red[600]!
-                                    : Colors.blue[600]!,
-                                width: 2),
-                          ),
-                          onPressed: () {
-                            if (usernameController.text.isEmpty) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Mohon isi username terlebih dahulu'),
-                                  backgroundColor: Colors.red,
-                                ),
-                              );
-                              return;
-                            }
-                            if (isTherapyStarted) {
-                              stopTherapy();
-                            } else {
-                              startTherapy();
-                            }
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
+                  borderRadius: BorderRadius.circular(20),
                 ),
-              ],
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  children: [
+                    TextField(
+                      controller: usernameController,
+                      style: const TextStyle(color: Colors.white),
+                      decoration: const InputDecoration(
+                        labelText: 'Username',
+                        labelStyle: TextStyle(color: Colors.lightBlueAccent),
+                        enabledBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.lightBlueAccent),
+                        ),
+                        focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.lightBlueAccent),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    
+                    TextField(
+                      controller: teganganController,
+                      keyboardType: TextInputType.number,
+                      style: const TextStyle(color: Colors.white),
+                      decoration: const InputDecoration(
+                        labelText: 'Tegangan (V)',
+                        labelStyle: TextStyle(color: Colors.lightBlueAccent),
+                        enabledBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.lightBlueAccent),
+                        ),
+                        focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.lightBlueAccent),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
+                    const Text(
+                      'Waktu Terapi',
+                      style: TextStyle(
+                        fontSize: 22,
+                        color: Colors.lightBlueAccent,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      formatTime(timeRemaining),
+                      style: const TextStyle(
+                        fontSize: 48,
+                        color: Colors.amberAccent,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    
+                    if (!isTherapyStarted) ...[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          _buildTimeButton(20),
+                          const SizedBox(width: 10),
+                          _buildTimeButton(40),
+                          const SizedBox(width: 10),
+                          _buildTimeButton(60),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      SizedBox(
+                        width: 100,
+                        child: TextField(
+                          controller: minuteController,
+                          keyboardType: TextInputType.number,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                          ),
+                          decoration: const InputDecoration(
+                            labelText: 'Menit',
+                            labelStyle: TextStyle(color: Colors.lightBlueAccent),
+                            enabledBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(color: Colors.lightBlueAccent),
+                            ),
+                            focusedBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(color: Colors.lightBlueAccent),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 20),
+                    
+                    OutlinedButton.icon(
+                      icon: Icon(
+                        isTherapyStarted ? Icons.stop : Icons.play_arrow,
+                        color: Colors.white,
+                      ),
+                      label: Text(
+                        isTherapyStarted ? 'Berhenti Terapi' : 'Mulai Terapi',
+                        style: const TextStyle(color: Colors.lightBlueAccent),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        padding:
+                            const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+                        backgroundColor: isTherapyStarted
+                            ? Colors.red[800]
+                            : Colors.blue[800],
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        side: BorderSide(
+                            color: isTherapyStarted
+                                ? Colors.red[600]!
+                                : Colors.blue[600]!,
+                            width: 2),
+                      ),
+                      onPressed: () {
+                        if (usernameController.text.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Mohon isi username terlebih dahulu'),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                          return;
+                        }
+                        if (isTherapyStarted) {
+                          stopTherapy();
+                        } else {
+                          startTherapy();
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
         ),

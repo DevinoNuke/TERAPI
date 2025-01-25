@@ -80,77 +80,146 @@ class _DataGSRScreenState extends State<DataGSRScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title:const Text(
+        title: const Text(
           'Riwayat Data GSR',
-          style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
+        elevation: 0,
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [Colors.blue, Colors.blue[800]!],
+              colors: [Colors.blue[700]!, Colors.blue[900]!],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
           ),
         ),
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: _data.length,
-              itemBuilder: (context, index) {
-                return Card(
-                  elevation: 4,
-                  margin: const EdgeInsets.only(bottom: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  color: Colors.blue[900],
-                  child: ListTile(
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    title: Text(
-                      'Username: ${_data[index]['username']}',
-                      style: const TextStyle(
-                        color: Colors.lightBlueAccent,
-                        fontWeight: FontWeight.bold,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.blue[50]!, Colors.blue[100]!],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: _data.length,
+                itemBuilder: (context, index) {
+                  return Card(
+                    elevation: 8,
+                    margin: const EdgeInsets.only(bottom: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [Colors.blue[800]!, Colors.blue[900]!],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: ListTile(
+                        contentPadding: const EdgeInsets.all(16),
+                        title: Row(
+                          children: [
+                            const Icon(
+                              Icons.person,
+                              color: Colors.lightBlueAccent,
+                              size: 24,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              _data[index]['username'],
+                              style: const TextStyle(
+                                color: Colors.lightBlueAccent,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: 12),
+                            _buildDataRow(
+                              Icons.show_chart,
+                              'First Data',
+                              _data[index]['first_data'],
+                            ),
+                            _buildDataRow(
+                              Icons.timeline,
+                              'Last Data',
+                              _data[index]['last_data'],
+                            ),
+                            _buildDataRow(
+                              Icons.bolt,
+                              'Tegangan',
+                              _data[index]['tegangan'],
+                            ),
+                            _buildDataRow(
+                              Icons.access_time,
+                              'Waktu',
+                              _data[index]['waktu'],
+                            ),
+                            _buildDataRow(
+                              Icons.calendar_today,
+                              'Tanggal',
+                              _data[index]['date'],
+                            ),
+                          ],
+                        ),
+                        trailing: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.lightBlueAccent.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          padding: const EdgeInsets.all(8),
+                          child: const Icon(
+                            Icons.arrow_forward_ios,
+                            color: Colors.lightBlueAccent,
+                            size: 20,
+                          ),
+                        ),
                       ),
                     ),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'First Data: ${_data[index]['first_data']}',
-                          style: const TextStyle(color: Colors.white70),
-                        ),
-                        Text(
-                          'Last Data: ${_data[index]['last_data']}',
-                          style: const TextStyle(color: Colors.white70),
-                        ),
-                        Text(
-                          'Date: ${_data[index]['date']}',
-                          style: const TextStyle(color: Colors.white70),
-                        ),
-                        Text(
-                          'Tegangan: ${_data[index]['tegangan']}',
-                          style: const TextStyle(color: Colors.white70),
-                        ),
-                        Text(
-                          'Waktu: ${_data[index]['waktu']}',
-                          style: const TextStyle(color: Colors.white70),
-                        ),
-                      ],
-                    ),
-                    trailing: const Icon(
-                      Icons.arrow_forward_ios,
-                      color: Colors.lightBlueAccent,
-                      size: 20,
-                    ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
+      ),
+    );
+  }
+
+  Widget _buildDataRow(IconData icon, String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.white70, size: 16),
+          const SizedBox(width: 8),
+          Text(
+            '$label: ',
+            style: const TextStyle(
+              color: Colors.white70,
+              fontWeight: FontWeight.w500,
             ),
+          ),
+          Text(
+            value,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
