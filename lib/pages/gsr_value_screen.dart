@@ -185,14 +185,20 @@ class _GSRValueScreenState extends State<GSRValueScreen> {
       BuildContext context, IconData icon, String label, Widget nextPage) {
     return OutlinedButton.icon(
       icon: Icon(icon, color: Colors.white),
-      label: Text(label, style: const TextStyle(color: Colors.lightBlueAccent)),
+      label: Text(
+        label,
+        style: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.w600
+        )
+      ),
       style: OutlinedButton.styleFrom(
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
-        backgroundColor: Colors.blue[800],
+        backgroundColor: Colors.deepPurple[700],
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(12),
         ),
-        side: BorderSide(color: Colors.blue[600]!, width: 2),
+        side: const BorderSide(color: Colors.deepPurpleAccent, width: 2),
       ),
       onPressed: () {
         Navigator.push(

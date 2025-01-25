@@ -37,8 +37,8 @@ class _DataGSRScreenState extends State<DataGSRScreen> {
         ),
       );
       
-      print('Response status: ${response.statusCode}');
-      print('Response data: ${response.data}');
+      debugPrint('Response status: ${response.statusCode}');
+      debugPrint('Response data: ${response.data}');
       
       if (response.statusCode == 200) {
         final List<dynamic> jsonData = response.data;
@@ -56,20 +56,20 @@ class _DataGSRScreenState extends State<DataGSRScreen> {
           _isLoading = false;
         });
       } else {
-        print('Error status: ${response.statusCode}');
+        debugPrint('Error status: ${response.statusCode}');
         setState(() {
           _isLoading = false;
         });
       }
     } on DioException catch (e) {
-      print('Dio error: ${e.message}');
-      print('Dio error type: ${e.type}');
-      print('Dio error response: ${e.response}');
+      debugPrint('Dio error: ${e.message}');
+      debugPrint('Dio error type: ${e.type}');
+      debugPrint('Dio error response: ${e.response}');
       setState(() {
         _isLoading = false;
       });
     } catch (e) {
-      print('General error: $e');
+      debugPrint('General error: $e');
       setState(() {
         _isLoading = false;
       });
@@ -80,7 +80,7 @@ class _DataGSRScreenState extends State<DataGSRScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
+        title:const Text(
           'Riwayat Data GSR',
           style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
         ),
@@ -96,23 +96,23 @@ class _DataGSRScreenState extends State<DataGSRScreen> {
         ),
       ),
       body: _isLoading
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : ListView.builder(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               itemCount: _data.length,
               itemBuilder: (context, index) {
                 return Card(
                   elevation: 4,
-                  margin: EdgeInsets.only(bottom: 12),
+                  margin: const EdgeInsets.only(bottom: 12),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                   color: Colors.blue[900],
                   child: ListTile(
-                    contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     title: Text(
                       'Username: ${_data[index]['username']}',
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Colors.lightBlueAccent,
                         fontWeight: FontWeight.bold,
                       ),
@@ -122,27 +122,27 @@ class _DataGSRScreenState extends State<DataGSRScreen> {
                       children: [
                         Text(
                           'First Data: ${_data[index]['first_data']}',
-                          style: TextStyle(color: Colors.white70),
+                          style: const TextStyle(color: Colors.white70),
                         ),
                         Text(
                           'Last Data: ${_data[index]['last_data']}',
-                          style: TextStyle(color: Colors.white70),
+                          style: const TextStyle(color: Colors.white70),
                         ),
                         Text(
                           'Date: ${_data[index]['date']}',
-                          style: TextStyle(color: Colors.white70),
+                          style: const TextStyle(color: Colors.white70),
                         ),
                         Text(
                           'Tegangan: ${_data[index]['tegangan']}',
-                          style: TextStyle(color: Colors.white70),
+                          style: const TextStyle(color: Colors.white70),
                         ),
                         Text(
                           'Waktu: ${_data[index]['waktu']}',
-                          style: TextStyle(color: Colors.white70),
+                          style: const TextStyle(color: Colors.white70),
                         ),
                       ],
                     ),
-                    trailing: Icon(
+                    trailing: const Icon(
                       Icons.arrow_forward_ios,
                       color: Colors.lightBlueAccent,
                       size: 20,
