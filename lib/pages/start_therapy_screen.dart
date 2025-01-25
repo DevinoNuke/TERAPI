@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
+import 'dart:convert';
 
 class StartTherapyScreen extends StatefulWidget {
   const StartTherapyScreen({super.key});
@@ -15,6 +16,8 @@ class StartTherapyScreenState extends State<StartTherapyScreen> {
   int timeRemaining = 1800; // Default 30 menit dalam detik
   Timer? timer;
   TextEditingController minuteController = TextEditingController(text: '30');
+  TextEditingController usernameController = TextEditingController();
+  TextEditingController teganganController = TextEditingController(text: '20');
   late MqttServerClient client;
   bool mqttConnected = false;
   final String topicName = 'therapy/status'; // topic untuk publish/subscribe
@@ -203,7 +206,13 @@ class StartTherapyScreenState extends State<StartTherapyScreen> {
   void publishMessage(String message) {
     if (client.connectionStatus?.state == MqttConnectionState.connected) {
       final builder = MqttClientPayloadBuilder();
-      builder.addString(message);
+      final payload = {
+        "username": usernameController.text,
+        "tegangan": "${teganganController.text} V",
+        "waktu": "${minuteController.text} Menit",
+        "data": "20.2"
+      };
+      builder.addString(json.encode(payload));
       client.publishMessage(topicName, MqttQos.atLeastOnce, builder.payload!);
     }
   }
@@ -213,6 +222,8 @@ class StartTherapyScreenState extends State<StartTherapyScreen> {
     client.disconnect();
     timer?.cancel();
     minuteController.dispose();
+    usernameController.dispose();
+    teganganController.dispose();
     super.dispose();
   }
 
@@ -252,6 +263,39 @@ class StartTherapyScreenState extends State<StartTherapyScreen> {
                     padding: const EdgeInsets.all(24.0),
                     child: Column(
                       children: [
+                        TextField(
+                          controller: usernameController,
+                          style: const TextStyle(color: Colors.white),
+                          decoration: const InputDecoration(
+                            labelText: 'Username',
+                            labelStyle: TextStyle(color: Colors.lightBlueAccent),
+                            enabledBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(color: Colors.lightBlueAccent),
+                            ),
+                            focusedBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(color: Colors.lightBlueAccent),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        
+                        TextField(
+                          controller: teganganController,
+                          keyboardType: TextInputType.number,
+                          style: const TextStyle(color: Colors.white),
+                          decoration: const InputDecoration(
+                            labelText: 'Tegangan (V)',
+                            labelStyle: TextStyle(color: Colors.lightBlueAccent),
+                            enabledBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(color: Colors.lightBlueAccent),
+                            ),
+                            focusedBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(color: Colors.lightBlueAccent),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+
                         const Text(
                           'Waktu Terapi',
                           style: TextStyle(
@@ -269,7 +313,7 @@ class StartTherapyScreenState extends State<StartTherapyScreen> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        const SizedBox(height: 10),
+                        
                         if (!isTherapyStarted) ...[
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -293,7 +337,7 @@ class StartTherapyScreenState extends State<StartTherapyScreen> {
                                 fontSize: 20,
                               ),
                               decoration: const InputDecoration(
-                                labelText: 'Minute',
+                                labelText: 'Menit',
                                 labelStyle: TextStyle(color: Colors.lightBlueAccent),
                                 enabledBorder: UnderlineInputBorder(
                                   borderSide: BorderSide(color: Colors.lightBlueAccent),
@@ -304,8 +348,9 @@ class StartTherapyScreenState extends State<StartTherapyScreen> {
                               ),
                             ),
                           ),
-                          const SizedBox(height: 20),
                         ],
+                        const SizedBox(height: 20),
+                        
                         OutlinedButton.icon(
                           icon: Icon(
                             isTherapyStarted ? Icons.stop : Icons.play_arrow,
@@ -331,6 +376,15 @@ class StartTherapyScreenState extends State<StartTherapyScreen> {
                                 width: 2),
                           ),
                           onPressed: () {
+                            if (usernameController.text.isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Mohon isi username terlebih dahulu'),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                              return;
+                            }
                             if (isTherapyStarted) {
                               stopTherapy();
                             } else {
