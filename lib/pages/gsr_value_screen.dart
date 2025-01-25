@@ -284,7 +284,7 @@ class _GSRValueScreenState extends State<GSRValueScreen> {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
         foregroundColor: Colors.white,
-        backgroundColor: Colors.white10,
+        backgroundColor: Colors.blue[900],
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(15),
