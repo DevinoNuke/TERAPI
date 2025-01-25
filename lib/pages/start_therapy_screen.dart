@@ -20,7 +20,8 @@ class StartTherapyScreenState extends State<StartTherapyScreen> {
   TextEditingController teganganController = TextEditingController(text: '20');
   late MqttServerClient client;
   bool mqttConnected = false;
-  final String topicName = 'therapy/status'; // topic untuk publish/subscribe
+  final String topicName = 'therapy/status';
+  final String sensorDataTopic = 'sensor/data';
 
   @override
   void initState() {
@@ -132,6 +133,9 @@ class StartTherapyScreenState extends State<StartTherapyScreen> {
 
     // Publish status ke MQTT
     publishMessage('stop');
+    
+    // Publish data sensor ke topic sensor/data
+    publishSensorData();
 
     // Tampilkan dialog notifikasi
     showTherapyCompletionDialog();
@@ -214,6 +218,21 @@ class StartTherapyScreenState extends State<StartTherapyScreen> {
       };
       builder.addString(json.encode(payload));
       client.publishMessage(topicName, MqttQos.atLeastOnce, builder.payload!);
+    }
+  }
+
+  void publishSensorData() {
+    if (client.connectionStatus?.state == MqttConnectionState.connected) {
+      final builder = MqttClientPayloadBuilder();
+      final payload = {
+        "username": usernameController.text,
+        "tegangan": "${teganganController.text} V",
+        "waktu": "${minuteController.text} Menit",
+        "data": "20.2"
+      };
+      builder.addString(json.encode(payload));
+      client.publishMessage(sensorDataTopic, MqttQos.atLeastOnce, builder.payload!);
+      debugPrint('Data sensor terkirim ke topic: $sensorDataTopic');
     }
   }
 
