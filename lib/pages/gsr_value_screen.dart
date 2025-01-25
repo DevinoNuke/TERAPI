@@ -116,94 +116,176 @@ class _GSRValueScreenState extends State<GSRValueScreen> {
       appBar: AppBar(
         title: const Text(
           'Monitor Terapi',
-          style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
+        elevation: 0,
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [Colors.blue, Colors.blue[800]!],
+              colors: [Colors.blue[700]!, Colors.blue[900]!],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
           ),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Card(
-              elevation: 12,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15),
-              ),
-              color: Colors.blue[900],
-              child: Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Column(
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.blue[50]!, Colors.blue[100]!],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              // Status Koneksi
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: mqttConnected ? Colors.green[100] : Colors.red[100],
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: mqttConnected ? Colors.green : Colors.red,
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text(
-                      'Nilai GSR',
-                      style: TextStyle(
-                        fontSize: 22,
-                        color: Colors.lightBlueAccent,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    Icon(
+                      mqttConnected ? Icons.wifi : Icons.wifi_off,
+                      color: mqttConnected ? Colors.green : Colors.red,
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(width: 8),
                     Text(
-                      gsrValue,
-                      style: const TextStyle(
-                        fontSize: 48,
-                        color: Colors.amberAccent,
+                      mqttConnected ? 'Terhubung' : 'Terputus',
+                      style: TextStyle(
+                        color: mqttConnected ? Colors.green : Colors.red,
                         fontWeight: FontWeight.bold,
                       ),
-                    ),
-                    const SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        _buildActionButton(
-                            context, Icons.bar_chart, 'Data GSR', DataGSRScreen()),
-                        _buildActionButton(context, Icons.play_arrow,
-                            'Mulai Terapi', const StartTherapyScreen()),
-                      ],
                     ),
                   ],
                 ),
               ),
-            ),
-          ],
+              const SizedBox(height: 24),
+              
+              // Card GSR Value
+              Expanded(
+                child: Card(
+                  elevation: 8,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Colors.blue[800]!, Colors.blue[900]!],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(24.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            Icons.monitor_heart_outlined,
+                            size: 48,
+                            color: Colors.white70,
+                          ),
+                          const SizedBox(height: 16),
+                          const Text(
+                            'Nilai GSR',
+                            style: TextStyle(
+                              fontSize: 24,
+                              color: Colors.white70,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                            decoration: BoxDecoration(
+                              color: Colors.white10,
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                            child: Text(
+                              gsrValue,
+                              style: const TextStyle(
+                                fontSize: 64,
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 32),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              _buildActionButton(
+                                context,
+                                Icons.analytics_outlined,
+                                'Data GSR',
+                                DataGSRScreen(),
+                              ),
+                              _buildActionButton(
+                                context,
+                                Icons.play_circle_outline,
+                                'Mulai Terapi',
+                                const StartTherapyScreen(),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  OutlinedButton _buildActionButton(
-      BuildContext context, IconData icon, String label, Widget nextPage) {
-    return OutlinedButton.icon(
-      icon: Icon(icon, color: Colors.white),
-      label: Text(
-        label,
-        style: const TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.w600
-        )
-      ),
-      style: OutlinedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
-        backgroundColor: Colors.deepPurple[700],
+  Widget _buildActionButton(BuildContext context, IconData icon, String label, Widget nextPage) {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        foregroundColor: Colors.white,
+        backgroundColor: Colors.white10,
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(15),
         ),
-        side: const BorderSide(color: Colors.deepPurpleAccent, width: 2),
+        elevation: 0,
       ),
       onPressed: () {
         Navigator.push(
-            context, MaterialPageRoute(builder: (context) => nextPage));
+          context,
+          MaterialPageRoute(builder: (context) => nextPage),
+        );
       },
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 32),
+          const SizedBox(height: 8),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
