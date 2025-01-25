@@ -32,14 +32,14 @@ class _GSRValueScreenState extends State<GSRValueScreen> {
     client.onDisconnected = onDisconnected;
     client.onSubscribed = onSubscribed;
     client.onSubscribeFail = onSubscribeFail;
-    
+
     final connMessage = MqttConnectMessage()
         .withClientIdentifier('flutter_client')
         .withWillTopic('willtopic')
         .withWillMessage('Will message')
         .startClean()
         .withWillQos(MqttQos.atLeastOnce);
-    
+
     client.connectionMessage = connMessage;
   }
 
@@ -47,27 +47,34 @@ class _GSRValueScreenState extends State<GSRValueScreen> {
     try {
       debugPrint('Menghubungkan ke MQTT broker...');
       await client.connect();
-      
+
       if (client.connectionStatus!.state == MqttConnectionState.connected) {
         debugPrint('Terhubung ke MQTT broker');
         client.subscribe(topicName, MqttQos.atLeastOnce);
-        
+
         client.updates!.listen((List<MqttReceivedMessage<MqttMessage?>>? c) {
           if (c == null) return;
           final recMessage = c[0].payload as MqttPublishMessage;
           final payload = MqttPublishPayload.bytesToStringAsString(recMessage.payload.message);
-          
+
           if (mounted) {
             setState(() {
               gsrValue = payload;
             });
           }
-          debugPrint('Nilai GSR diterima: $payload dari topic: ${c[0].topic}');
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Nilai GSR diterima: $payload dari topic: ${c[0].topic}'),
+            ),
+          );
         });
       } else {
-        debugPrint('Koneksi gagal - memutuskan, status: ${client.connectionStatus}');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Koneksi gagal - memutuskan, status: ${client.connectionStatus}'),
+          ),
+        );
         client.disconnect();
-        // Mencoba koneksi ulang
         Future.delayed(const Duration(seconds: 2), () {
           if (mounted) {
             connectClient();
@@ -77,7 +84,6 @@ class _GSRValueScreenState extends State<GSRValueScreen> {
     } catch (e) {
       debugPrint('Exception: $e');
       client.disconnect();
-      // Mencoba koneksi ulang setelah error
       Future.delayed(const Duration(seconds: 2), () {
         if (mounted) {
           connectClient();
@@ -88,20 +94,36 @@ class _GSRValueScreenState extends State<GSRValueScreen> {
 
   void onConnected() {
     setState(() => mqttConnected = true);
-    debugPrint('Terhubung ke MQTT Broker');
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Terhubung ke MQTT Broker'),
+      ),
+    );
   }
 
   void onDisconnected() {
     setState(() => mqttConnected = false);
-    debugPrint('Terputus dari MQTT Broker');
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Terputus dari MQTT Broker'),
+      ),
+    );
   }
 
   void onSubscribed(String topic) {
-    debugPrint('Berlangganan ke topic: $topic');
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Berlangganan ke topic: $topic'),
+      ),
+    );
   }
 
   void onSubscribeFail(String topic) {
-    debugPrint('Gagal berlangganan ke topic: $topic');
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Gagal berlangganan ke topic: $topic'),
+      ),
+    );
   }
 
   @override
@@ -130,52 +152,55 @@ class _GSRValueScreenState extends State<GSRValueScreen> {
           ),
         ),
       ),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Colors.blue[50]!, Colors.blue[100]!],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
+      body: RefreshIndicator(
+        onRefresh: () async {
+          await connectClient();
+        },
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.blue[50]!, Colors.blue[100]!],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
           ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              // Status Koneksi
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                decoration: BoxDecoration(
-                  color: mqttConnected ? Colors.green[100] : Colors.red[100],
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: mqttConnected ? Colors.green : Colors.red,
-                    width: 1,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: ListView(
+              children: [
+                // Status Koneksi
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: mqttConnected ? Colors.green[100] : Colors.red[100],
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: mqttConnected ? Colors.green : Colors.red,
+                      width: 1,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        mqttConnected ? Icons.wifi : Icons.wifi_off,
+                        color: mqttConnected ? Colors.green : Colors.red,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        mqttConnected ? 'Terhubung' : 'Terputus',
+                        style: TextStyle(
+                          color: mqttConnected ? Colors.green : Colors.red,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      mqttConnected ? Icons.wifi : Icons.wifi_off,
-                      color: mqttConnected ? Colors.green : Colors.red,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      mqttConnected ? 'Terhubung' : 'Terputus',
-                      style: TextStyle(
-                        color: mqttConnected ? Colors.green : Colors.red,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
-              
-              // Card GSR Value
-              Expanded(
-                child: Card(
+                const SizedBox(height: 24),
+
+                // Card GSR Value
+                Card(
                   elevation: 8,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
@@ -247,8 +272,8 @@ class _GSRValueScreenState extends State<GSRValueScreen> {
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
