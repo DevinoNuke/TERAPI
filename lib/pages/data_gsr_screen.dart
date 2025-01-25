@@ -172,22 +172,22 @@ class _DataGSRScreenState extends State<DataGSRScreen> {
                             _buildDataRow(
                               Icons.calendar_today,
                               'Tanggal',
-                              _data[index]['date'],
+                              DateTime.parse(_data[index]['date']).toLocal().toString().split('.')[0],
                             ),
                           ],
                         ),
-                        trailing: Container(
-                          decoration: BoxDecoration(
-                            color: Colors.lightBlueAccent.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          padding: const EdgeInsets.all(8),
-                          child: const Icon(
-                            Icons.arrow_forward_ios,
-                            color: Colors.lightBlueAccent,
-                            size: 20,
-                          ),
-                        ),
+                        // trailing: Container(
+                        //   decoration: BoxDecoration(
+                        //     color: Colors.lightBlueAccent.withOpacity(0.2),
+                        //     borderRadius: BorderRadius.circular(8),
+                        //   ),
+                        //   padding: const EdgeInsets.all(8),
+                        //   child: const Icon(
+                        //     Icons.arrow_forward_ios,
+                        //     color: Colors.lightBlueAccent,
+                        //     size: 20,
+                        //   ),
+                        // ),
                       ),
                     ),
                   );
