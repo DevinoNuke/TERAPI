@@ -19,7 +19,7 @@ class _DataGSRScreenState extends State<DataGSRScreen> {
 
   Future<void> fetchData() async {
     final dio = Dio();
-    dio.options.baseUrl = 'http://47.238.5.204:3000';
+    dio.options.baseUrl = 'http://8.215.9.8:3000';
     dio.options.connectTimeout = const Duration(seconds: 5);
     dio.options.receiveTimeout = const Duration(seconds: 3);
     
