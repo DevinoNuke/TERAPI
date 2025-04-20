@@ -15,9 +15,9 @@ class StartTherapyScreenState extends State<StartTherapyScreen> {
   bool isTherapyStarted = false;
   int timeRemaining = 300; // Default 5 menit dalam detik
   Timer? timer;
-  TextEditingController minuteController = TextEditingController(text: '30');
+  TextEditingController minuteController = TextEditingController(text: '5');
   TextEditingController usernameController = TextEditingController();
-  TextEditingController teganganController = TextEditingController(text: '20');
+  TextEditingController teganganController = TextEditingController(text: '12');
   late MqttServerClient client;
   bool mqttConnected = false;
   final String topicName = 'therapy/status';

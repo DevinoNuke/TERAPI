@@ -151,12 +151,12 @@ class _DataGSRScreenState extends State<DataGSRScreen> {
                             const SizedBox(height: 12),
                             _buildDataRow(
                               Icons.show_chart,
-                              'First Data',
+                              'Sensor GSR 1',
                               _data[index]['first_data'],
                             ),
                             _buildDataRow(
                               Icons.timeline,
-                              'Last Data',
+                              'Sensor GSR 2',
                               _data[index]['last_data'],
                             ),
                             _buildDataRow(
