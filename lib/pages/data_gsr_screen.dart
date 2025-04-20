@@ -150,6 +150,11 @@ class _DataGSRScreenState extends State<DataGSRScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const SizedBox(height: 12),
+                           _buildDataRow(
+                              Icons.person,
+                              'Jenis Kelamin',
+                              _data[index]['jenis_kelamin'],
+                            ),
                             _buildDataRow(
                               Icons.show_chart,
                               'Sensor GSR 1',
@@ -175,11 +180,6 @@ class _DataGSRScreenState extends State<DataGSRScreen> {
                               'Tanggal',
                               DateTime.parse(_data[index]['date']).toLocal().toString().split('.')[0],
                             ),
-                            _buildDataRow(
-                              Icons.person,
-                              'Jenis Kelamin',
-                              _data[index]['jenis_kelamin'],
-                            )
                           ],
                         ),
                         // trailing: Container(
