@@ -13,7 +13,7 @@ class StartTherapyScreen extends StatefulWidget {
 
 class StartTherapyScreenState extends State<StartTherapyScreen> {
   bool isTherapyStarted = false;
-  int timeRemaining = 1800; // Default 30 menit dalam detik
+  int timeRemaining = 300; // Default 5 menit dalam detik
   Timer? timer;
   TextEditingController minuteController = TextEditingController(text: '30');
   TextEditingController usernameController = TextEditingController();
@@ -22,6 +22,7 @@ class StartTherapyScreenState extends State<StartTherapyScreen> {
   bool mqttConnected = false;
   final String topicName = 'therapy/status';
   final String sensorDataTopic = 'sensor/data';
+  final String controlTopic = 'therapy/control';
 
   @override
   void initState() {
@@ -108,8 +109,8 @@ class StartTherapyScreenState extends State<StartTherapyScreen> {
       isTherapyStarted = true;
     });
 
-    // Publish status ke MQTT
-    publishMessage('start');
+    // Publish ke MQTT dengan topic therapy/control
+    publishControlMessage('start');
 
     timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
@@ -131,8 +132,8 @@ class StartTherapyScreenState extends State<StartTherapyScreen> {
       timeRemaining = (minutes ?? 30) * 60;
     });
 
-    // Publish status ke MQTT
-    publishMessage('stop');
+    // Publish ke MQTT dengan topic therapy/control
+    publishControlMessage('stop');
     
     // Publish data sensor ke topic sensor/data
     publishSensorData();
@@ -207,17 +208,19 @@ class StartTherapyScreenState extends State<StartTherapyScreen> {
     return '${minutes.toString().padLeft(2, '0')}:${remainingSeconds.toString().padLeft(2, '0')}';
   }
 
-  void publishMessage(String message) {
+  void publishControlMessage(String command) {
     if (client.connectionStatus?.state == MqttConnectionState.connected) {
       final builder = MqttClientPayloadBuilder();
+      final int duration = int.tryParse(minuteController.text) ?? 5;
+      
       final payload = {
-        "username": usernameController.text,
-        "tegangan": "${teganganController.text} V",
-        "waktu": "${minuteController.text} Menit",
-        "data": "20.2"
+        "command": command,
+        "duration": duration
       };
+      
       builder.addString(json.encode(payload));
-      client.publishMessage(topicName, MqttQos.atLeastOnce, builder.payload!);
+      client.publishMessage(controlTopic, MqttQos.atLeastOnce, builder.payload!);
+      debugPrint('Pesan kontrol terkirim ke topic: $controlTopic dengan payload: ${json.encode(payload)}');
     }
   }
 
