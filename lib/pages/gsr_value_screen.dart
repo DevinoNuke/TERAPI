@@ -17,6 +17,42 @@ class _GSRValueScreenState extends State<GSRValueScreen> {
   bool mqttConnected = false;
   final String topicName = 'sensor/gsr';
 
+  // Fungsi untuk mendapatkan status pasien berdasarkan nilai GSR
+  String getPatientStatus() {
+    try {
+      double gsr = double.parse(gsrValue);
+      if (gsr > 300) {
+        return 'Stress';
+      } else if (gsr > 200) {
+        return 'Tegang';
+      } else if (gsr > 100) {
+        return 'Normal';
+      } else {
+        return 'Rileks';
+      }
+    } catch (e) {
+      return 'Tidak Diketahui';
+    }
+  }
+
+  // Fungsi untuk mendapatkan warna status
+  Color getStatusColor() {
+    try {
+      double gsr = double.parse(gsrValue);
+      if (gsr > 300) {
+        return Colors.red;
+      } else if (gsr > 200) {
+        return Colors.orange;
+      } else if (gsr > 100) {
+        return Colors.yellow;
+      } else {
+        return Colors.green;
+      }
+    } catch (e) {
+      return Colors.grey;
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -249,6 +285,56 @@ class _GSRValueScreenState extends State<GSRValueScreen> {
                               ),
                             ),
                           ),
+                          
+                          // Status pasien berdasarkan nilai GSR
+                          const SizedBox(height: 24),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                            decoration: BoxDecoration(
+                              color: getStatusColor().withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(15),
+                              border: Border.all(
+                                color: getStatusColor(),
+                                width: 2,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  getPatientStatus() == 'Stress' 
+                                      ? Icons.warning_amber_rounded 
+                                      : getPatientStatus() == 'Rileks'
+                                          ? Icons.sentiment_very_satisfied
+                                          : Icons.sentiment_neutral,
+                                  color: getStatusColor(),
+                                  size: 28,
+                                ),
+                                const SizedBox(width: 12),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text(
+                                      'Status Pasien',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.white70,
+                                      ),
+                                    ),
+                                    Text(
+                                      getPatientStatus(),
+                                      style: TextStyle(
+                                        fontSize: 22,
+                                        fontWeight: FontWeight.bold,
+                                        color: getStatusColor(),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                          
                           const SizedBox(height: 32),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,

@@ -16,6 +16,7 @@ class StartTherapyScreenState extends State<StartTherapyScreen> {
   int timeRemaining = 300; // Default 5 menit dalam detik
   Timer? timer;
   TextEditingController minuteController = TextEditingController(text: '5');
+  TextEditingController jeniskelamincontroller = TextEditingController();
   TextEditingController usernameController = TextEditingController();
   TextEditingController teganganController = TextEditingController(text: '12');
   late MqttServerClient client;
@@ -229,6 +230,7 @@ class StartTherapyScreenState extends State<StartTherapyScreen> {
       final builder = MqttClientPayloadBuilder();
       final payload = {
         "username": usernameController.text,
+        "jeniskelamin": jeniskelamincontroller.text,
         "tegangan": "${teganganController.text} V",
         "waktu": "${minuteController.text} Menit",
         "data": "20.2"
