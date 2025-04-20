@@ -230,7 +230,7 @@ class StartTherapyScreenState extends State<StartTherapyScreen> {
       final builder = MqttClientPayloadBuilder();
       final payload = {
         "username": usernameController.text,
-        "jeniskelamin": jeniskelamincontroller.text,
+        "jenis_kelamin": jeniskelamincontroller.text,
         "tegangan": "${teganganController.text} V",
         "waktu": "${minuteController.text} Menit",
         "data": "20.2"
