@@ -81,7 +81,7 @@ class _DataGSRScreenState extends State<DataGSRScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Riwayat Data GSR',
+          'Riwayat Terapi',
           style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
