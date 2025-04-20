@@ -174,6 +174,11 @@ class _DataGSRScreenState extends State<DataGSRScreen> {
                               'Tanggal',
                               DateTime.parse(_data[index]['date']).toLocal().toString().split('.')[0],
                             ),
+                            _buildDataRow(
+                              Icons.person,
+                              'Jenis Kelamin',
+                              _data[index]['jeniskelamin'],
+                            )
                           ],
                         ),
                         // trailing: Container(
