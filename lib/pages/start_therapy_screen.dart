@@ -248,6 +248,7 @@ class StartTherapyScreenState extends State<StartTherapyScreen> {
     minuteController.dispose();
     usernameController.dispose();
     teganganController.dispose();
+    jeniskelamincontroller.dispose();
     super.dispose();
   }
 
@@ -312,6 +313,38 @@ class StartTherapyScreenState extends State<StartTherapyScreen> {
                           borderSide: BorderSide(color: Colors.lightBlueAccent),
                         ),
                       ),
+                    ),
+                    const SizedBox(height: 20),
+                    
+                    DropdownButtonFormField<String>(
+                      value: jeniskelamincontroller.text.isEmpty ? null : jeniskelamincontroller.text,
+                      dropdownColor: Colors.blue[900],
+                      style: const TextStyle(color: Colors.white),
+                      decoration: const InputDecoration(
+                        labelText: 'Jenis Kelamin',
+                        labelStyle: TextStyle(color: Colors.lightBlueAccent),
+                        enabledBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.lightBlueAccent),
+                        ),
+                        focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.lightBlueAccent),
+                        ),
+                      ),
+                      onChanged: (String? value) {
+                        setState(() {
+                          jeniskelamincontroller.text = value ?? '';
+                        });
+                      },
+                      items: const [
+                        DropdownMenuItem<String>(
+                          value: 'Laki-laki',
+                          child: Text('Laki-laki', style: TextStyle(color: Colors.white)),
+                        ),
+                        DropdownMenuItem<String>(
+                          value: 'Perempuan',
+                          child: Text('Perempuan', style: TextStyle(color: Colors.white)),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 20),
                     
