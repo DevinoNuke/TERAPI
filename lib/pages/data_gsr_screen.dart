@@ -47,6 +47,7 @@ class _DataGSRScreenState extends State<DataGSRScreen> {
             'username': item['username'] ?? '',
             'first_data': item['first_data'] ?? '',
             'last_data': item['last_data'] ?? '',
+            'jenis_kelamin': item['jenis_kelamin'] ?? '',
             'tegangan': item['tegangan'] ?? '',
             'waktu': item['waktu'] ?? '',
             'date': item['createdAt'] != null 
@@ -177,7 +178,7 @@ class _DataGSRScreenState extends State<DataGSRScreen> {
                             _buildDataRow(
                               Icons.person,
                               'Jenis Kelamin',
-                              _data[index]['jeniskelamin'],
+                              _data[index]['jenis_kelamin'],
                             )
                           ],
                         ),
