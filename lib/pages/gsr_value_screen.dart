@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
+import 'dart:convert';
 import 'data_gsr_screen.dart';
 import 'start_therapy_screen.dart';
 
@@ -13,14 +14,15 @@ class GSRValueScreen extends StatefulWidget {
 
 class _GSRValueScreenState extends State<GSRValueScreen> {
   late MqttServerClient client;
-  String gsrValue = '0';
+  String gsrValue1 = '0';
+  String gsrValue2 = '0';
   bool mqttConnected = false;
-  final String topicName = 'sensor/gsr';
+  final String topicName = 'therapy/status';
 
   // Fungsi untuk mendapatkan status pasien berdasarkan nilai GSR
   String getPatientStatus() {
     try {
-      double gsr = double.parse(gsrValue);
+      double gsr = double.parse(gsrValue1);
       if (gsr > 300) {
         return 'Stress';
       } else if (gsr > 200) {
@@ -38,7 +40,7 @@ class _GSRValueScreenState extends State<GSRValueScreen> {
   // Fungsi untuk mendapatkan warna status
   Color getStatusColor() {
     try {
-      double gsr = double.parse(gsrValue);
+      double gsr = double.parse(gsrValue1);
       if (gsr > 300) {
         return Colors.red;
       } else if (gsr > 200) {
@@ -94,13 +96,21 @@ class _GSRValueScreenState extends State<GSRValueScreen> {
           final payload = MqttPublishPayload.bytesToStringAsString(recMessage.payload.message);
 
           if (mounted) {
-            setState(() {
-              gsrValue = payload;
-            });
+            try {
+              // Parse payload sebagai JSON
+              final Map<String, dynamic> data = Map<String, dynamic>.from(
+                  json.decode(payload));
+              setState(() {
+                gsrValue1 = data['gsr1'].toString();
+                gsrValue2 = data['gsr2'].toString();
+              });
+            } catch (e) {
+              debugPrint('Error parsing JSON: $e');
+            }
           }
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Nilai GSR diterima: $payload dari topic: ${c[0].topic}'),
+              content: Text('Data GSR diterima dari topic: ${c[0].topic}'),
             ),
           );
         });
@@ -261,8 +271,10 @@ class _GSRValueScreenState extends State<GSRValueScreen> {
                             color: Colors.white70,
                           ),
                           const SizedBox(height: 16),
+                          
+                          // GSR 1 Value
                           const Text(
-                            'Nilai GSR',
+                            'Nilai GSR 1',
                             style: TextStyle(
                               fontSize: 24,
                               color: Colors.white70,
@@ -277,7 +289,34 @@ class _GSRValueScreenState extends State<GSRValueScreen> {
                               borderRadius: BorderRadius.circular(15),
                             ),
                             child: Text(
-                              gsrValue,
+                              gsrValue1,
+                              style: const TextStyle(
+                                fontSize: 64,
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          
+                          // GSR 2 Value
+                          const SizedBox(height: 24),
+                          const Text(
+                            'Nilai GSR 2',
+                            style: TextStyle(
+                              fontSize: 24,
+                              color: Colors.white70,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                            decoration: BoxDecoration(
+                              color: Colors.white10,
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                            child: Text(
+                              gsrValue2,
                               style: const TextStyle(
                                 fontSize: 64,
                                 color: Colors.white,
