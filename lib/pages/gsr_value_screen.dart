@@ -19,7 +19,6 @@ class _GSRValueScreenState extends State<GSRValueScreen> {
   bool mqttConnected = false;
   final String topicName = 'therapy/status';
 
-  // Fungsi untuk mendapatkan status pasien berdasarkan nilai resistansi kulit
   String getPatientStatus() {
     try {
       double gsr1 = double.parse(gsrValue1);
@@ -38,7 +37,6 @@ class _GSRValueScreenState extends State<GSRValueScreen> {
     }
   }
 
-  // Fungsi untuk mendapatkan warna status
   Color getStatusColor() {
     try {
       double gsr1 = double.parse(gsrValue1);
@@ -330,7 +328,8 @@ class _GSRValueScreenState extends State<GSRValueScreen> {
                           // Status pasien berdasarkan nilai GSR
                           const SizedBox(height: 24),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                             decoration: BoxDecoration(
                               color: getStatusColor().withOpacity(0.2),
                               borderRadius: BorderRadius.circular(15),
@@ -352,25 +351,28 @@ class _GSRValueScreenState extends State<GSRValueScreen> {
                                   size: 28,
                                 ),
                                 const SizedBox(width: 12),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Text(
-                                      'Kondisi Pasien',
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        color: Colors.white70,
+                                Flexible(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      const Text(
+                                        'Kondisi Pasien',
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.white70,
+                                        ),
                                       ),
-                                    ),
-                                    Text(
-                                      getPatientStatus(),
-                                      style: TextStyle(
-                                        fontSize: 22,
-                                        fontWeight: FontWeight.bold,
-                                        color: getStatusColor(),
+                                      Text(
+                                        getPatientStatus(),
+                                        style: TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold,
+                                          color: getStatusColor(),
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
                               ],
                             ),
