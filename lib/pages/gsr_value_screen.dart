@@ -19,18 +19,19 @@ class _GSRValueScreenState extends State<GSRValueScreen> {
   bool mqttConnected = false;
   final String topicName = 'therapy/status';
 
-  // Fungsi untuk mendapatkan status pasien berdasarkan nilai GSR
+  // Fungsi untuk mendapatkan status pasien berdasarkan nilai resistansi kulit
   String getPatientStatus() {
     try {
-      double gsr = double.parse(gsrValue1);
-      if (gsr > 300) {
-        return 'Stress';
-      } else if (gsr > 200) {
-        return 'Tegang';
-      } else if (gsr > 100) {
-        return 'Normal';
+      double gsr1 = double.parse(gsrValue1);
+      double gsr2 = double.parse(gsrValue2);
+      double rataRata = (gsr1 + gsr2) / 2;
+      
+      if (rataRata > 300) {
+        return 'Resistansi Kulit Tinggi';
+      } else if (rataRata > 150) {
+        return 'Resistansi Kulit Sedang';
       } else {
-        return 'Rileks';
+        return 'Resistansi Kulit Normal';
       }
     } catch (e) {
       return 'Tidak Diketahui';
@@ -40,13 +41,14 @@ class _GSRValueScreenState extends State<GSRValueScreen> {
   // Fungsi untuk mendapatkan warna status
   Color getStatusColor() {
     try {
-      double gsr = double.parse(gsrValue1);
-      if (gsr > 300) {
-        return Colors.red;
-      } else if (gsr > 200) {
-        return Colors.orange;
-      } else if (gsr > 100) {
-        return Colors.yellow;
+      double gsr1 = double.parse(gsrValue1);
+      double gsr2 = double.parse(gsrValue2);
+      double rataRata = (gsr1 + gsr2) / 2;
+      
+      if (rataRata > 300) {
+        return Colors.blue;
+      } else if (rataRata > 150) {
+        return Colors.amber;
       } else {
         return Colors.green;
       }
@@ -341,11 +343,11 @@ class _GSRValueScreenState extends State<GSRValueScreen> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Icon(
-                                  getPatientStatus() == 'Stress' 
-                                      ? Icons.warning_amber_rounded 
-                                      : getPatientStatus() == 'Rileks'
-                                          ? Icons.sentiment_very_satisfied
-                                          : Icons.sentiment_neutral,
+                                  getPatientStatus() == 'Resistansi Kulit Tinggi' 
+                                      ? Icons.signal_cellular_alt 
+                                      : getPatientStatus() == 'Resistansi Kulit Sedang'
+                                          ? Icons.signal_cellular_alt_2_bar
+                                          : Icons.signal_cellular_alt_1_bar,
                                   color: getStatusColor(),
                                   size: 28,
                                 ),
@@ -354,7 +356,7 @@ class _GSRValueScreenState extends State<GSRValueScreen> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     const Text(
-                                      'Status Pasien',
+                                      'Kondisi Pasien',
                                       style: TextStyle(
                                         fontSize: 14,
                                         color: Colors.white70,
