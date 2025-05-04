@@ -267,17 +267,31 @@ class StartTherapyScreenState extends State<StartTherapyScreen> {
 
   void publishSensorData() {
     if (client.connectionStatus?.state == MqttConnectionState.connected) {
+      // Debug untuk melihat isi gsrAvgHistory
+      debugPrint('gsrAvgHistory: $gsrAvgHistory');
+      
       // Perhitungan GSR yang benar
       int gsrAverage = 0;
+      
+      // Ambil nilai GSR terbaru langsung dari gsrValue1 dan gsrValue2
+      int gsr1 = int.tryParse(gsrValue1) ?? 0;
+      int gsr2 = int.tryParse(gsrValue2) ?? 0;
+      
       if (gsrAvgHistory.isNotEmpty) {
-        // Menghitung rata-rata dari history
-        double sum = gsrAvgHistory.reduce((a, b) => a + b);
-        gsrAverage = (sum / gsrAvgHistory.length).round(); // Dibulatkan ke integer
+        // Menggunakan nilai terakhir dari history
+        gsrAverage = gsrAvgHistory.last.toInt();
+        debugPrint('Menggunakan nilai terakhir dari history: $gsrAverage');
       } else {
         // Jika tidak ada history, gunakan nilai GSR terakhir
-        int gsr1 = int.tryParse(gsrValue1) ?? 0;
-        int gsr2 = int.tryParse(gsrValue2) ?? 0;
-        gsrAverage = ((gsr1 + gsr2) / 2).round(); // Dibulatkan ke integer
+        gsrAverage = ((gsr1 + gsr2) ~/ 2); // Pembagian integer
+        debugPrint('Menggunakan nilai GSR terakhir: gsr1=$gsr1, gsr2=$gsr2, average=$gsrAverage');
+      }
+      
+      // Jika masih 0, gunakan nilai GSR saat ini
+      if (gsrAverage == 0) {
+        // Gunakan nilai terbesar dari kedua sensor sebagai fallback
+        gsrAverage = gsr1 > gsr2 ? gsr1 : gsr2;
+        debugPrint('Nilai rata-rata 0, menggunakan nilai terbesar: $gsrAverage');
       }
       
       // Pastikan username tidak kosong
@@ -298,11 +312,11 @@ class StartTherapyScreenState extends State<StartTherapyScreen> {
         "jenis_kelamin": jeniskelamincontroller.text,
         "tegangan": voltage != '0' ? "$voltage V" : "${teganganController.text} V",
         "waktu": "${minuteController.text} Menit",
-        "data": gsrAverage.toString(), // Kirim sebagai string tapi tanpa desimal
+        "data": gsrAverage.toString(), // Kirim sebagai string integer
       };
       builder.addString(json.encode(payload));
       client.publishMessage(sensorDataTopic, MqttQos.atLeastOnce, builder.payload!);
-      debugPrint('Data sensor terkirim ke topic: $sensorDataTopic dengan nilai rata-rata GSR: $gsrAverage');
+      debugPrint('Data sensor terkirim ke topic: $sensorDataTopic dengan nilai GSR: $gsrAverage');
     }
   }
 
