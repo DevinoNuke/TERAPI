@@ -102,11 +102,10 @@ class StartTherapyScreenState extends State<StartTherapyScreen> {
                   duration = data['duration'].toString();
                 }
                 
-                // Jika terapi sedang berjalan, tambahkan nilai GSR sebagai angka asli, bukan pembagian
+                // Jika terapi sedang berjalan, tambahkan nilai rata-rata ke history
                 if (isTherapyStarted) {
                   double gsr1 = double.tryParse(gsrValue1) ?? 0;
                   double gsr2 = double.tryParse(gsrValue2) ?? 0;
-                  // Simpan rata-rata sebagai nilai penuh (bukan dibagi lagi)
                   double avg = (gsr1 + gsr2) / 2;
                   gsrAvgHistory.add(avg);
                 }
@@ -148,6 +147,8 @@ class StartTherapyScreenState extends State<StartTherapyScreen> {
   void startTherapy() {
     setState(() {
       isTherapyStarted = true;
+      // Reset data history saat terapi dimulai
+      gsrAvgHistory.clear();
     });
 
     // Publish ke MQTT dengan topic therapy/control
@@ -267,56 +268,29 @@ class StartTherapyScreenState extends State<StartTherapyScreen> {
 
   void publishSensorData() {
     if (client.connectionStatus?.state == MqttConnectionState.connected) {
-      // Debug untuk melihat isi gsrAvgHistory
-      debugPrint('gsrAvgHistory: $gsrAvgHistory');
-      
-      // Perhitungan GSR yang benar
-      int gsrAverage = 0;
-      
-      // Ambil nilai GSR terbaru langsung dari gsrValue1 dan gsrValue2
-      int gsr1 = int.tryParse(gsrValue1) ?? 0;
-      int gsr2 = int.tryParse(gsrValue2) ?? 0;
-      
+      // Hitung rata-rata GSR dari seluruh data yang dikumpulkan selama terapi
+      double gsrAverage = 0;
       if (gsrAvgHistory.isNotEmpty) {
-        // Menggunakan nilai terakhir dari history
-        gsrAverage = gsrAvgHistory.last.toInt();
-        debugPrint('Menggunakan nilai terakhir dari history: $gsrAverage');
+        gsrAverage = gsrAvgHistory.reduce((a, b) => a + b) / gsrAvgHistory.length;
       } else {
-        // Jika tidak ada history, gunakan nilai GSR terakhir
-        gsrAverage = ((gsr1 + gsr2) ~/ 2); // Pembagian integer
-        debugPrint('Menggunakan nilai GSR terakhir: gsr1=$gsr1, gsr2=$gsr2, average=$gsrAverage');
-      }
-      
-      // Jika masih 0, gunakan nilai GSR saat ini
-      if (gsrAverage == 0) {
-        // Gunakan nilai terbesar dari kedua sensor sebagai fallback
-        gsrAverage = gsr1 > gsr2 ? gsr1 : gsr2;
-        debugPrint('Nilai rata-rata 0, menggunakan nilai terbesar: $gsrAverage');
-      }
-      
-      // Pastikan username tidak kosong
-      if (usernameController.text.isEmpty) {
-        debugPrint('Username kosong, tidak dapat mengirim data');
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Username tidak boleh kosong'),
-            backgroundColor: Colors.red,
-          ),
-        );
-        return;
+        // Jika tidak ada data history (mungkin terapi dihentikan terlalu cepat),
+        // gunakan nilai GSR saat ini
+        double gsr1 = double.tryParse(gsrValue1) ?? 0;
+        double gsr2 = double.tryParse(gsrValue2) ?? 0;
+        gsrAverage = (gsr1 + gsr2) / 2;
       }
       
       final builder = MqttClientPayloadBuilder();
       final payload = {
         "username": usernameController.text,
         "jenis_kelamin": jeniskelamincontroller.text,
-        "tegangan": voltage != '0' ? "$voltage V" : "${teganganController.text} V",
+        "tegangan": "${teganganController.text} V",
         "waktu": "${minuteController.text} Menit",
-        "data": gsrAverage.toString(), // Kirim sebagai string integer
+        "data": gsrAverage.toStringAsFixed(2) // Format ke 2 digit desimal
       };
       builder.addString(json.encode(payload));
       client.publishMessage(sensorDataTopic, MqttQos.atLeastOnce, builder.payload!);
-      debugPrint('Data sensor terkirim ke topic: $sensorDataTopic dengan nilai GSR: $gsrAverage');
+      debugPrint('Data sensor terkirim ke topic: $sensorDataTopic dengan nilai rata-rata GSR: ${gsrAverage.toStringAsFixed(2)}');
     }
   }
 
