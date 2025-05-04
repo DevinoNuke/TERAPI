@@ -285,8 +285,6 @@ class StartTherapyScreenState extends State<StartTherapyScreen> {
         "tegangan": voltage != '0' ? "$voltage V" : "${teganganController.text} V",
         "waktu": duration != '0' ? "$duration Detik" : "${minuteController.text} Menit",
         "data": gsrAverage.toStringAsFixed(2), // Format ke 2 digit desimal
-        "gsr1": gsrValue1,
-        "gsr2": gsrValue2
       };
       builder.addString(json.encode(payload));
       client.publishMessage(sensorDataTopic, MqttQos.atLeastOnce, builder.payload!);
