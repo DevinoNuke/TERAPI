@@ -22,8 +22,17 @@ class StartTherapyScreenState extends State<StartTherapyScreen> {
   late MqttServerClient client;
   bool mqttConnected = false;
   final String topicName = 'therapy/status';
-  final String sensorDataTopic = 'sensor/data';
+  final String sensorDataTopic = 'sensor/datagsr';
   final String controlTopic = 'therapy/control';
+  
+  // Tambahkan variabel untuk menyimpan nilai GSR
+  String gsrValue1 = '0';
+  String gsrValue2 = '0';
+  String voltage = '0';  // Tambahkan untuk menyimpan tegangan
+  String duration = '0'; // Tambahkan untuk menyimpan durasi
+  
+  // Untuk menyimpan data historis GSR selama terapi
+  List<double> gsrAvgHistory = [];
 
   @override
   void initState() {
@@ -75,6 +84,36 @@ class StartTherapyScreenState extends State<StartTherapyScreen> {
           final recMessage = c[0].payload as MqttPublishMessage;
           final payload = MqttPublishPayload.bytesToStringAsString(recMessage.payload.message);
           debugPrint('Pesan diterima: $payload dari topic: ${c[0].topic}');
+          
+          // Parse JSON dan simpan nilai GSR
+          if (c[0].topic == topicName) {
+            try {
+              final Map<String, dynamic> data = Map<String, dynamic>.from(
+                json.decode(payload));
+              setState(() {
+                gsrValue1 = data['gsr1'].toString();
+                gsrValue2 = data['gsr2'].toString();
+                
+                // Tambahkan untuk menyimpan voltage dan duration jika ada
+                if (data.containsKey('voltage')) {
+                  voltage = data['voltage'].toString();
+                }
+                if (data.containsKey('duration')) {
+                  duration = data['duration'].toString();
+                }
+                
+                // Jika terapi sedang berjalan, tambahkan nilai rata-rata ke history
+                if (isTherapyStarted) {
+                  double gsr1 = double.tryParse(gsrValue1) ?? 0;
+                  double gsr2 = double.tryParse(gsrValue2) ?? 0;
+                  double avg = (gsr1 + gsr2) / 2;
+                  gsrAvgHistory.add(avg);
+                }
+              });
+            } catch (e) {
+              debugPrint('Error parsing JSON: $e');
+            }
+          }
         });
       } else {
         debugPrint('Connection failed - disconnecting, status is ${client.connectionStatus}');
@@ -227,17 +266,31 @@ class StartTherapyScreenState extends State<StartTherapyScreen> {
 
   void publishSensorData() {
     if (client.connectionStatus?.state == MqttConnectionState.connected) {
+      // Hitung rata-rata GSR dari seluruh data yang dikumpulkan selama terapi
+      double gsrAverage = 0;
+      if (gsrAvgHistory.isNotEmpty) {
+        gsrAverage = gsrAvgHistory.reduce((a, b) => a + b) / gsrAvgHistory.length;
+      } else {
+        // Jika tidak ada data history (mungkin terapi dihentikan terlalu cepat),
+        // gunakan nilai GSR saat ini
+        double gsr1 = double.tryParse(gsrValue1) ?? 0;
+        double gsr2 = double.tryParse(gsrValue2) ?? 0;
+        gsrAverage = (gsr1 + gsr2) / 2;
+      }
+      
       final builder = MqttClientPayloadBuilder();
       final payload = {
         "username": usernameController.text,
         "jenis_kelamin": jeniskelamincontroller.text,
-        "tegangan": "${teganganController.text} V",
-        "waktu": "${minuteController.text} Menit",
-        "data": "20.2"
+        "tegangan": voltage != '0' ? "$voltage V" : "${teganganController.text} V",
+        "waktu": duration != '0' ? "$duration Detik" : "${minuteController.text} Menit",
+        "data": gsrAverage.toStringAsFixed(2), // Format ke 2 digit desimal
+        "gsr1": gsrValue1,
+        "gsr2": gsrValue2
       };
       builder.addString(json.encode(payload));
       client.publishMessage(sensorDataTopic, MqttQos.atLeastOnce, builder.payload!);
-      debugPrint('Data sensor terkirim ke topic: $sensorDataTopic');
+      debugPrint('Data sensor terkirim ke topic: $sensorDataTopic dengan nilai rata-rata GSR: ${gsrAverage.toStringAsFixed(2)}');
     }
   }
 

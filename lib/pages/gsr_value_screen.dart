@@ -365,7 +365,7 @@ class _GSRValueScreenState extends State<GSRValueScreen> {
                                       Text(
                                         getPatientStatus(),
                                         style: TextStyle(
-                                          fontSize: 20,
+                                          fontSize: 15,
                                           fontWeight: FontWeight.bold,
                                           color: getStatusColor(),
                                         ),
