@@ -278,12 +278,24 @@ class StartTherapyScreenState extends State<StartTherapyScreen> {
         gsrAverage = (gsr1 + gsr2) / 2;
       }
       
+      // Pastikan username tidak kosong
+      if (usernameController.text.isEmpty) {
+        debugPrint('Username kosong, tidak dapat mengirim data');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Username tidak boleh kosong'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+      
       final builder = MqttClientPayloadBuilder();
       final payload = {
         "username": usernameController.text,
         "jenis_kelamin": jeniskelamincontroller.text,
         "tegangan": voltage != '0' ? "$voltage V" : "${teganganController.text} V",
-        "waktu": duration != '0' ? "$duration Detik" : "${minuteController.text} Menit",
+        "waktu": "${minuteController.text} Menit",
         "data": gsrAverage.toStringAsFixed(2), // Format ke 2 digit desimal
       };
       builder.addString(json.encode(payload));
