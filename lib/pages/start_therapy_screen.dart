@@ -266,16 +266,14 @@ class StartTherapyScreenState extends State<StartTherapyScreen> {
 
   void publishSensorData() {
     if (client.connectionStatus?.state == MqttConnectionState.connected) {
-      // Hitung rata-rata GSR dari seluruh data yang dikumpulkan selama terapi
-      double gsrAverage = 0;
+      // PERBAIKAN: Tidak menggunakan rata-rata, langsung gunakan nilai GSR asli
+      String gsrData;
       if (gsrAvgHistory.isNotEmpty) {
-        gsrAverage = gsrAvgHistory.reduce((a, b) => a + b) / gsrAvgHistory.length;
+        // Gunakan nilai terakhir dari history jika ada
+        gsrData = gsrAvgHistory.last.toStringAsFixed(0);
       } else {
-        // Jika tidak ada data history (mungkin terapi dihentikan terlalu cepat),
-        // gunakan nilai GSR saat ini
-        double gsr1 = double.tryParse(gsrValue1) ?? 0;
-        double gsr2 = double.tryParse(gsrValue2) ?? 0;
-        gsrAverage = (gsr1 + gsr2) / 2;
+        // Jika tidak ada history, ambil nilai GSR1 saja karena ini yang biasanya digunakan
+        gsrData = gsrValue1;
       }
       
       // Pastikan username tidak kosong
@@ -296,11 +294,11 @@ class StartTherapyScreenState extends State<StartTherapyScreen> {
         "jenis_kelamin": jeniskelamincontroller.text,
         "tegangan": voltage != '0' ? "$voltage V" : "${teganganController.text} V",
         "waktu": "${minuteController.text} Menit",
-        "data": gsrAverage.toStringAsFixed(2), // Format ke 2 digit desimal
+        "data": gsrData, // Gunakan nilai asli dari GSR
       };
       builder.addString(json.encode(payload));
       client.publishMessage(sensorDataTopic, MqttQos.atLeastOnce, builder.payload!);
-      debugPrint('Data sensor terkirim ke topic: $sensorDataTopic dengan nilai rata-rata GSR: ${gsrAverage.toStringAsFixed(2)}');
+      debugPrint('Data sensor terkirim ke topic: $sensorDataTopic dengan nilai GSR: $gsrData');
     }
   }
 
