@@ -155,16 +155,16 @@ class _DataGSRScreenState extends State<DataGSRScreen> {
                               'Jenis Kelamin',
                               _data[index]['jenis_kelamin'],
                             ),
-                            _buildDataRow(
-                              Icons.show_chart,
-                              'Sensor GSR 1',
-                              _data[index]['first_data'],
-                            ),
-                            _buildDataRow(
-                              Icons.timeline,
-                              'Sensor GSR 2',
-                              _data[index]['last_data'],
-                            ),
+                            // _buildDataRow(
+                            //   Icons.show_chart,
+                            //   'Sensor GSR 1',
+                            //   _data[index]['first_data'],
+                            // ),
+                            // _buildDataRow(
+                            //   Icons.timeline,
+                            //   'Sensor GSR 2',
+                            //   _data[index]['last_data'],
+                            // ),
                             _buildDataRow(
                               Icons.bolt,
                               'Tegangan',
