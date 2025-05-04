@@ -32,7 +32,8 @@ class StartTherapyScreenState extends State<StartTherapyScreen> {
   String duration = '0'; // Tambahkan untuk menyimpan durasi
   
   // Untuk menyimpan data historis GSR selama terapi
-  List<double> gsrAvgHistory = [];
+  List<int> gsr1History = [];
+  List<int> gsr2History = [];
 
   @override
   void initState() {
@@ -102,12 +103,17 @@ class StartTherapyScreenState extends State<StartTherapyScreen> {
                   duration = data['duration'].toString();
                 }
                 
-                // Jika terapi sedang berjalan, tambahkan nilai rata-rata ke history
+                // Jika terapi sedang berjalan, simpan nilai GSR1 dan GSR2 ke history
                 if (isTherapyStarted) {
-                  double gsr1 = double.tryParse(gsrValue1) ?? 0;
-                  double gsr2 = double.tryParse(gsrValue2) ?? 0;
-                  double avg = (gsr1 + gsr2) / 2;
-                  gsrAvgHistory.add(avg);
+                  int gsr1 = int.tryParse(gsrValue1) ?? 0;
+                  int gsr2 = int.tryParse(gsrValue2) ?? 0;
+                  
+                  // Simpan nilai GSR ke history
+                  gsr1History.add(gsr1);
+                  gsr2History.add(gsr2);
+                  
+                  debugPrint('GSR ditambahkan ke history: gsr1=$gsr1, gsr2=$gsr2');
+                  debugPrint('Jumlah data GSR yang terkumpul: ${gsr1History.length}');
                 }
               });
             } catch (e) {
@@ -148,7 +154,9 @@ class StartTherapyScreenState extends State<StartTherapyScreen> {
     setState(() {
       isTherapyStarted = true;
       // Reset data history saat terapi dimulai
-      gsrAvgHistory.clear();
+      gsr1History.clear();
+      gsr2History.clear();
+      debugPrint('GSR history telah direset saat memulai terapi');
     });
 
     // Publish ke MQTT dengan topic therapy/control
@@ -268,29 +276,62 @@ class StartTherapyScreenState extends State<StartTherapyScreen> {
 
   void publishSensorData() {
     if (client.connectionStatus?.state == MqttConnectionState.connected) {
-      // Hitung rata-rata GSR dari seluruh data yang dikumpulkan selama terapi
-      double gsrAverage = 0;
-      if (gsrAvgHistory.isNotEmpty) {
-        gsrAverage = gsrAvgHistory.reduce((a, b) => a + b) / gsrAvgHistory.length;
+      // Debug untuk melihat data yang terkumpul
+      debugPrint('History data: gsr1=${gsr1History.length} values, gsr2=${gsr2History.length} values');
+      
+      // Hitung rata-rata GSR dari data yang terkumpul selama terapi
+      int gsr1Average = 0;
+      int gsr2Average = 0;
+      
+      if (gsr1History.isNotEmpty) {
+        // Hitung jumlah total GSR1
+        int gsr1Total = gsr1History.reduce((a, b) => a + b);
+        gsr1Average = (gsr1Total / gsr1History.length).round();
+        debugPrint('GSR1 rata-rata: $gsr1Average dari ${gsr1History.length} nilai');
       } else {
-        // Jika tidak ada data history (mungkin terapi dihentikan terlalu cepat),
-        // gunakan nilai GSR saat ini
-        double gsr1 = double.tryParse(gsrValue1) ?? 0;
-        double gsr2 = double.tryParse(gsrValue2) ?? 0;
-        gsrAverage = (gsr1 + gsr2) / 2;
+        // Jika tidak ada history, gunakan nilai GSR1 terakhir
+        gsr1Average = int.tryParse(gsrValue1) ?? 0;
+        debugPrint('Tidak ada history GSR1, menggunakan nilai terakhir: $gsr1Average');
+      }
+      
+      if (gsr2History.isNotEmpty) {
+        // Hitung jumlah total GSR2
+        int gsr2Total = gsr2History.reduce((a, b) => a + b);
+        gsr2Average = (gsr2Total / gsr2History.length).round();
+        debugPrint('GSR2 rata-rata: $gsr2Average dari ${gsr2History.length} nilai');
+      } else {
+        // Jika tidak ada history, gunakan nilai GSR2 terakhir
+        gsr2Average = int.tryParse(gsrValue2) ?? 0;
+        debugPrint('Tidak ada history GSR2, menggunakan nilai terakhir: $gsr2Average');
+      }
+      
+      // Hitung rata-rata total dari kedua sensor
+      int gsrTotalAverage = ((gsr1Average + gsr2Average) / 2).round();
+      debugPrint('Rata-rata total: $gsrTotalAverage (GSR1=$gsr1Average, GSR2=$gsr2Average)');
+      
+      // Pastikan username tidak kosong
+      if (usernameController.text.isEmpty) {
+        debugPrint('Username kosong, tidak dapat mengirim data');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Username tidak boleh kosong'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
       }
       
       final builder = MqttClientPayloadBuilder();
       final payload = {
         "username": usernameController.text,
         "jenis_kelamin": jeniskelamincontroller.text,
-        "tegangan": "${teganganController.text} V",
+        "tegangan": voltage != '0' ? "$voltage V" : "${teganganController.text} V",
         "waktu": "${minuteController.text} Menit",
-        "data": gsrAverage.toStringAsFixed(2) // Format ke 2 digit desimal
+        "data": gsrTotalAverage.toString(), // Kirim sebagai string tanpa desimal
       };
       builder.addString(json.encode(payload));
       client.publishMessage(sensorDataTopic, MqttQos.atLeastOnce, builder.payload!);
-      debugPrint('Data sensor terkirim ke topic: $sensorDataTopic dengan nilai rata-rata GSR: ${gsrAverage.toStringAsFixed(2)}');
+      debugPrint('Data sensor terkirim ke topic: $sensorDataTopic dengan nilai GSR rata-rata: $gsrTotalAverage');
     }
   }
 
