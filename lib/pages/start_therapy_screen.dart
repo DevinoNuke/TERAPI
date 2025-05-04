@@ -411,21 +411,21 @@ class StartTherapyScreenState extends State<StartTherapyScreen> {
                     ),
                     const SizedBox(height: 20),
                     
-                    TextField(
-                      controller: teganganController,
-                      keyboardType: TextInputType.number,
-                      style: const TextStyle(color: Colors.white),
-                      decoration: const InputDecoration(
-                        labelText: 'Tegangan (V)',
-                        labelStyle: TextStyle(color: Colors.lightBlueAccent),
-                        enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.lightBlueAccent),
-                        ),
-                        focusedBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.lightBlueAccent),
-                        ),
-                      ),
-                    ),
+                    // TextField(
+                    //   controller: teganganController,
+                    //   keyboardType: TextInputType.number,
+                    //   style: const TextStyle(color: Colors.white),
+                    //   decoration: const InputDecoration(
+                    //     labelText: 'Tegangan (V)',
+                    //     labelStyle: TextStyle(color: Colors.lightBlueAccent),
+                    //     enabledBorder: UnderlineInputBorder(
+                    //       borderSide: BorderSide(color: Colors.lightBlueAccent),
+                    //     ),
+                    //     focusedBorder: UnderlineInputBorder(
+                    //       borderSide: BorderSide(color: Colors.lightBlueAccent),
+                    //     ),
+                    //   ),
+                    // ),
                     const SizedBox(height: 20),
 
                     const Text(
