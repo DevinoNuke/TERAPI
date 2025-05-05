@@ -276,11 +276,13 @@ class StartTherapyScreenState extends State<StartTherapyScreen> {
 
   void publishSensorData() {
     if (client.connectionStatus?.state == MqttConnectionState.connected) {
+      // Gunakan nilai GSR terakhir 
       int gsr1Value = int.tryParse(gsrValue1) ?? 0;
       int gsr2Value = int.tryParse(gsrValue2) ?? 0;
       
       debugPrint('Menggunakan nilai GSR terakhir: GSR1=$gsr1Value, GSR2=$gsr2Value');
       
+      // Pastikan username tidak kosong
       if (usernameController.text.isEmpty) {
         debugPrint('Username kosong, tidak dapat mengirim data');
         ScaffoldMessenger.of(context).showSnackBar(
@@ -292,17 +294,20 @@ class StartTherapyScreenState extends State<StartTherapyScreen> {
         return;
       }
       
+      // Menggunakan solusi 3: kirim string dalam format "gsr1|gsr2"
+      final String combinedData = "$gsr1Value|$gsr2Value";
+      
       final builder = MqttClientPayloadBuilder();
       final payload = {
         "username": usernameController.text,
         "jenis_kelamin": jeniskelamincontroller.text,
         "tegangan": voltage != '0' ? "$voltage V" : "${teganganController.text} V",
         "waktu": "${minuteController.text} Menit",
-        "data": gsr1Value.toString(),
+        "data": combinedData, // Format "gsr1|gsr2"
       };
       builder.addString(json.encode(payload));
       client.publishMessage(sensorDataTopic, MqttQos.atLeastOnce, builder.payload!);
-      debugPrint('Data sensor terkirim ke topic: $sensorDataTopic dengan nilai GSR1: $gsr1Value, GSR2: $gsr2Value');
+      debugPrint('Data sensor terkirim ke topic: $sensorDataTopic dengan format data: $combinedData');
     }
   }
 
