@@ -17,7 +17,7 @@ class _GSRValueScreenState extends State<GSRValueScreen> {
   String gsrValue1 = '0';
   String gsrValue2 = '0';
   bool mqttConnected = false;
-  final String topicName = 'therapy/status';
+  final String topicName = 'sensor/realtimegsr';
 
   String getPatientStatus() {
     try {
