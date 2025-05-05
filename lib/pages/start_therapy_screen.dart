@@ -22,6 +22,7 @@ class StartTherapyScreenState extends State<StartTherapyScreen> {
   late MqttServerClient client;
   bool mqttConnected = false;
   final String topicName = 'therapy/status';
+  final String realTimeGsrTopic = 'sensor/realtimegsr';
   final String sensorDataTopic = 'sensor/datagsr';
   final String controlTopic = 'therapy/control';
   
@@ -79,6 +80,7 @@ class StartTherapyScreenState extends State<StartTherapyScreen> {
       if (client.connectionStatus!.state == MqttConnectionState.connected) {
         debugPrint('Connected to MQTT broker successfully');
         client.subscribe(topicName, MqttQos.atLeastOnce);
+        client.subscribe(realTimeGsrTopic, MqttQos.atLeastOnce);
         
         client.updates!.listen((List<MqttReceivedMessage<MqttMessage?>>? c) {
           if (c == null) return;
@@ -86,14 +88,29 @@ class StartTherapyScreenState extends State<StartTherapyScreen> {
           final payload = MqttPublishPayload.bytesToStringAsString(recMessage.payload.message);
           debugPrint('Pesan diterima: $payload dari topic: ${c[0].topic}');
           
-          // Parse JSON dan simpan nilai GSR
-          if (c[0].topic == topicName) {
-            try {
-              final Map<String, dynamic> data = Map<String, dynamic>.from(
-                json.decode(payload));
+          // Parse JSON sesuai dengan topic
+          try {
+            final Map<String, dynamic> data = Map<String, dynamic>.from(
+              json.decode(payload));
+            
+            if (c[0].topic == realTimeGsrTopic) {
+              // Data dari topic sensor/realtimegsr
               setState(() {
                 gsrValue1 = data['gsr1'].toString();
                 gsrValue2 = data['gsr2'].toString();
+                
+                debugPrint('Data GSR diperbarui dari realTimeGsrTopic: GSR1=$gsrValue1, GSR2=$gsrValue2');
+              });
+            } else if (c[0].topic == topicName) {
+              // Data dari topic therapy/status (tetap dipertahankan untuk kompatibilitas)
+              setState(() {
+                // Periksa apakah kunci gsr1 dan gsr2 ada di data
+                if (data.containsKey('gsr1')) {
+                  gsrValue1 = data['gsr1'].toString();
+                }
+                if (data.containsKey('gsr2')) {
+                  gsrValue2 = data['gsr2'].toString();
+                }
                 
                 // Tambahkan untuk menyimpan voltage dan duration jika ada
                 if (data.containsKey('voltage')) {
@@ -102,23 +119,10 @@ class StartTherapyScreenState extends State<StartTherapyScreen> {
                 if (data.containsKey('duration')) {
                   duration = data['duration'].toString();
                 }
-                
-                // Jika terapi sedang berjalan, simpan nilai GSR1 dan GSR2 ke history
-                if (isTherapyStarted) {
-                  int gsr1 = int.tryParse(gsrValue1) ?? 0;
-                  int gsr2 = int.tryParse(gsrValue2) ?? 0;
-                  
-                  // Simpan nilai GSR ke history
-                  gsr1History.add(gsr1);
-                  gsr2History.add(gsr2);
-                  
-                  debugPrint('GSR ditambahkan ke history: gsr1=$gsr1, gsr2=$gsr2');
-                  debugPrint('Jumlah data GSR yang terkumpul: ${gsr1History.length}');
-                }
               });
-            } catch (e) {
-              debugPrint('Error parsing JSON: $e');
             }
+          } catch (e) {
+            debugPrint('Error parsing JSON: $e');
           }
         });
       } else {
@@ -276,7 +280,7 @@ class StartTherapyScreenState extends State<StartTherapyScreen> {
 
   void publishSensorData() {
     if (client.connectionStatus?.state == MqttConnectionState.connected) {
-      // Gunakan nilai GSR terakhir 
+      // Gunakan nilai GSR terakhir yang diterima dari sensor/realtimegsr
       int gsr1Value = int.tryParse(gsrValue1) ?? 0;
       int gsr2Value = int.tryParse(gsrValue2) ?? 0;
       
@@ -294,7 +298,7 @@ class StartTherapyScreenState extends State<StartTherapyScreen> {
         return;
       }
       
-      // Menggunakan solusi 3: kirim string dalam format "gsr1|gsr2"
+      // Format: "gsr1|gsr2"
       final String combinedData = "$gsr1Value|$gsr2Value";
       
       final builder = MqttClientPayloadBuilder();
@@ -303,7 +307,7 @@ class StartTherapyScreenState extends State<StartTherapyScreen> {
         "jenis_kelamin": jeniskelamincontroller.text,
         "tegangan": voltage != '0' ? "$voltage V" : "${teganganController.text} V",
         "waktu": "${minuteController.text} Menit",
-        "data": combinedData, // Format "gsr1|gsr2"
+        "data": combinedData, // Format "gsr1|gsr2" yang diharapkan backend
       };
       builder.addString(json.encode(payload));
       client.publishMessage(sensorDataTopic, MqttQos.atLeastOnce, builder.payload!);
