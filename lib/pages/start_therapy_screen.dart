@@ -276,40 +276,11 @@ class StartTherapyScreenState extends State<StartTherapyScreen> {
 
   void publishSensorData() {
     if (client.connectionStatus?.state == MqttConnectionState.connected) {
-      // Debug untuk melihat data yang terkumpul
-      debugPrint('History data: gsr1=${gsr1History.length} values, gsr2=${gsr2History.length} values');
+      int gsr1Value = int.tryParse(gsrValue1) ?? 0;
+      int gsr2Value = int.tryParse(gsrValue2) ?? 0;
       
-      // Hitung rata-rata GSR dari data yang terkumpul selama terapi
-      int gsr1Average = 0;
-      int gsr2Average = 0;
+      debugPrint('Menggunakan nilai GSR terakhir: GSR1=$gsr1Value, GSR2=$gsr2Value');
       
-      if (gsr1History.isNotEmpty) {
-        // Hitung jumlah total GSR1
-        int gsr1Total = gsr1History.reduce((a, b) => a + b);
-        gsr1Average = (gsr1Total / gsr1History.length).round();
-        debugPrint('GSR1 rata-rata: $gsr1Average dari ${gsr1History.length} nilai');
-      } else {
-        // Jika tidak ada history, gunakan nilai GSR1 terakhir
-        gsr1Average = int.tryParse(gsrValue1) ?? 0;
-        debugPrint('Tidak ada history GSR1, menggunakan nilai terakhir: $gsr1Average');
-      }
-      
-      if (gsr2History.isNotEmpty) {
-        // Hitung jumlah total GSR2
-        int gsr2Total = gsr2History.reduce((a, b) => a + b);
-        gsr2Average = (gsr2Total / gsr2History.length).round();
-        debugPrint('GSR2 rata-rata: $gsr2Average dari ${gsr2History.length} nilai');
-      } else {
-        // Jika tidak ada history, gunakan nilai GSR2 terakhir
-        gsr2Average = int.tryParse(gsrValue2) ?? 0;
-        debugPrint('Tidak ada history GSR2, menggunakan nilai terakhir: $gsr2Average');
-      }
-      
-      // Hitung rata-rata total dari kedua sensor
-      int gsrTotalAverage = ((gsr1Average + gsr2Average) / 2).round();
-      debugPrint('Rata-rata total: $gsrTotalAverage (GSR1=$gsr1Average, GSR2=$gsr2Average)');
-      
-      // Pastikan username tidak kosong
       if (usernameController.text.isEmpty) {
         debugPrint('Username kosong, tidak dapat mengirim data');
         ScaffoldMessenger.of(context).showSnackBar(
@@ -327,11 +298,11 @@ class StartTherapyScreenState extends State<StartTherapyScreen> {
         "jenis_kelamin": jeniskelamincontroller.text,
         "tegangan": voltage != '0' ? "$voltage V" : "${teganganController.text} V",
         "waktu": "${minuteController.text} Menit",
-        "data": gsrTotalAverage.toString(), // Kirim sebagai string tanpa desimal
+        "data": gsr1Value.toString(),
       };
       builder.addString(json.encode(payload));
       client.publishMessage(sensorDataTopic, MqttQos.atLeastOnce, builder.payload!);
-      debugPrint('Data sensor terkirim ke topic: $sensorDataTopic dengan nilai GSR rata-rata: $gsrTotalAverage');
+      debugPrint('Data sensor terkirim ke topic: $sensorDataTopic dengan nilai GSR1: $gsr1Value, GSR2: $gsr2Value');
     }
   }
 
